@@ -1,0 +1,59 @@
+Design Netflix_or_Youtube
+
+Requirements -
+1. Watch videos
+2. Upload videos
+3. Search videos
+4. Like/Dislike
+5. Comment
+
+Capacity Estimate
+Let's assume -
+1. 1 Billion (10^9) registered users
+2. 100 Million (100 * 10^6) daily users
+3. 10 watch per user per day
+	=> (10*100*10^6) = 10^9 watch per day
+	=> 10^9 / 86400 = 11574 ~ 12000 watch per sec
+4. 10 search per user per day ~ 12000 search per sec 
+5. 10 Comment, like or dislike per user per day ~ 12000 input per sec
+6. upload to view ratio 1:100
+	=> 10^9 / 100 = 10^7 upload per day
+	=> 12000 / 100 = 120 upload per sec
+7. on avg 1 video == 1HR.
+   1 min of video == 10MB in 1 formate. 
+   Assume there will be 10 different formates or resolutions
+	=> 1 video in 1 formate = 600MB
+	=> 1 video in 10 formates = 6000MB ~ 6GB.
+
+Bandwidth Estimate -
+1. 12K views per sec, on avg each file is 600MB (in 1 formate)
+	=> (12K * 600MB) = 7200000MB = 7.2TB of data downloaded
+	=> 7.2TB/Sec outgoing bandwidth.
+2. 120 upload per sec, on avg each file is 600MB (estimate)
+	=> (120 * 600MB) = 72000MB = 72GB of data uploaded
+	=> 72BG/Sec of incoming bandwidth
+3. Each upload will trigger to produce 10 formate
+	=> 720GB/Sec of data processing bandwidth
+
+Storage estimate - 
+1. We have 10^7 upload per day.
+	=> 10^7 * 30 * 6GB = 1800PB per month of storage.
+
+System APIs - 
+... Do it later
+
+High Level Design
+1. User Database for name, email, id, pass. 
+2. Video process system 
+	=> A queue that will keep uploaded not yet unprocessed video
+	=> Processors or workers those will read from queue asynchronously reads from queue to do further process
+	=> Encoder to generate different formate
+	=> Database for 
+
+
+
+
+
+
+
+
