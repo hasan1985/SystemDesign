@@ -1,0 +1,41 @@
+AutoComplete
+
+1. Requirements -
+	* While user is typing to search, the system should suggest top 10 terms matching prefix with so far typed string.
+	* 50ms wait after each key strock to fire the query API.
+
+2. Requirements Questions -
+	* Should this suggestion list be different per user demographic, geo location, may be idividual user or current major event?
+
+3. Underlying Systems - 
+	* Let's think our sysmte similar to google's search page where millions of search requested everyday. 
+	* A distributed logging system logs each search.
+	* A distribute Ranking system reads the log file
+		* Ranks each term by let's say Frequency and a weight of recentness.
+		* Produces list of fils containin terms with associated rank values.
+		* These term-rank list files are ditributed in multiple servers.
+		* Each term is unique accross all files all servers.
+		* These term-rank list containing files are raw input for our AutoComplete System
+
+4. Here comes our AutoComplete System - 
+
+	1. A cluster of servers read given raw term-rank files and produce Sub-Ordered-Term-Rank file for each of these raw files.
+		* In Sub-Ordered-Term-Rank file terms are lexicographycally sorted within a file but not sorted yet accross files.
+		* Each Sub-Ordered-Term-Rank file data is published to a topic in a PUB/SUB system in lexicographycally sorted order.
+
+	2. Another Server reads chunks of data from all the topics and maintains a Min Heap that pops stream of terms, let's name it "Final-Ordered-Terms"
+		* The chunk size can vary based on this server's capacity.
+		* As long every topic has one representing chunk in this server then the Min Heap output will be sorted accross all Sub-Ordered-Term-Rank files.
+		* The "Final-Ordered-Terms" stream will be published to another topic for further processing.
+		* This server can be SPOF, how to solve it -
+			* So we will have a cluster/serise of such servers.
+			* All the live servers in this cluster will be marked with a sequence number 1,2,3...n.
+			* Each PUB/SUB topic must be subscribed by one and only one of these servers.
+			* The nth Server's (n!=1) output will an intput to the (n-1)th server.
+			* The output of the 1st server (let's name it primary server) is the final stream of "Final-Ordered-Terms"
+			* If a server goes down - 
+				* We have to re-sequence the remaining servers.
+				* The unattended topics needs to be subscribed by remaining servers.
+
+
+	

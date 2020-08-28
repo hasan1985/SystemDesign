@@ -6,6 +6,7 @@ Requirements -
 3. Search videos
 4. Like/Dislike
 5. Comment
+6. Personalized dashboard based on history + infinite scrolling.
 
 Capacity Estimate
 Let's assume -
@@ -14,14 +15,13 @@ Let's assume -
 3. 10 watch per user per day
 	=> (10*100*10^6) = 10^9 watch per day
 	=> 10^9 / 86400 = 11574 ~ 12000 watch per sec
-4. 10 search per user per day ~ 12000 search per sec 
-5. 10 Comment, like or dislike per user per day ~ 12000 input per sec
-6. upload to view ratio 1:100
+4. 10 search or comment or like/dislike per user per day ~ 12000 search per sec 
+5. upload to view ratio 1:100
 	=> 10^9 / 100 = 10^7 upload per day
 	=> 12000 / 100 = 120 upload per sec
-7. on avg 1 video == 1HR.
+6. Assume on avg 1 video == 1HR.
    1 min of video == 10MB in 1 formate. 
-   Assume there will be 10 different formates or resolutions
+   There will be 10 different formates or resolutions
 	=> 1 video in 1 formate = 600MB
 	=> 1 video in 10 formates = 6000MB ~ 6GB.
 
@@ -39,18 +39,68 @@ Storage estimate -
 1. We have 10^7 upload per day.
 	=> 10^7 * 30 * 6GB = 1800PB per month of storage.
 
+UI Design -
+	* horizontal scrolling for different genre
+
 System APIs - 
 ... Do it later
 
 High Level Design
-1. User Database for name, email, id, pass. 
-2. Video process system 
-	=> A queue that will keep uploaded not yet unprocessed video
-	=> Processors or workers those will read from queue asynchronously reads from queue to do further process
-	=> Encoder to generate different formate
-	=> Database for 
+1. User Database for name, email, id, pass.
+2. Video processing system
+	* Processing Queues to store uploaded unprocessed videos.
+	* Processors or workers those will read from queue asynchronously to do further process.
+	* Encoder to generate different formate
+	* Notification service to notify user when upload is done
+3. Storage for video meta data.
+4. Storage for video thumbnail and the video files.
+5. Storage for comments
+
+Video storage - 
+HDFS or GlusterFS to store video
+
+User dashboard and search
+	*
+
+Steaming system or read traffic
+	* Use open source media library like shaka-player
+
+Upload system or write traffic
+	* 
 
 
+
+Stuff to know - 
+
+File or video upload client side
+	* need to read
+
+File or video upload server side
+	*
+
+Client side code for media streaming -
+	* https://medium.com/canal-tech/how-video-streaming-works-on-the-web-an-introduction-7919739f7e1
+	video steaming receiver plugins - 
+		* https://github.com/google/shaka-player
+		* https://shaka-player-demo.appspot.com/docs/api/tutorial-basic-usage.html
+
+Server Side code for media streaming- 
+	* not sure, how the segmentation works.
+	* didn't understand - https://stackoverflow.com/questions/11343523/video-streaming-in-vlcj/11347526#11347526
+
+Possibliy related knowladge
+Steaming protocol - https://www.wowza.com/blog/streaming-protocols
+	* https://www.quora.com/What-technologies-should-I-use-to-build-a-video-streaming-website-like-Netflix-from-scratch-using-Java/answer/Ashley-John-29
+	* https://www.quora.com/profile/Ashley-John-29
+	* HTTP Live Steaming HLS - https://www.wowza.com/blog/hls-streaming-protocol
+	* https://www.quora.com/Which-streaming-protocol-does-Youtube-use
+	* https://www.linkedin.com/pulse/basics-how-video-streaming-works-ashish-deshmukh/
+	* https://www.sciencedirect.com/topics/computer-science/video-streaming
+	* https://www.quora.com/What-protocol-does-Netflix-use-for-streaming
+	* https://www.quora.com/What-is-the-reason-behind-Youtube-using-TCP-and-not-UDP
+
+Learn about TCP vs UDP
+https://www.quora.com/Does-video-streaming-use-TCP-or-UDP
 
 
 
