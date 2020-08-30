@@ -38,19 +38,28 @@ AutoComplete
 				* We have to re-sequence the remaining servers.
 				* The unattended topics needs to be subscribed by any remaining servers.
 
-	3. We will have cluster or servers keeoing a Trie datastructure in memory.
-		* A Processor server will keep reading from "Final-Ordered-Terms" and start filling the Trie server.
-		* Once the 1st server is filled with a range of terms from the ordered term list it will be marked with this range lets say (a-aaabbc). The last node on this trie will keep a pointer to the next server as well.
-		* Then the processer will start filling terms in the 2nd server and so on.
-		* How these trie look -
+	3. We will have cluster or servers keeping a Trie datastructure in memory.
+		* A Processor server will keep reading from "Final-Ordered-Terms" and start filling the 1st Trie server.
+		* Once the 1st server is filled with a range of terms from the ordered term list it will be marked with that range, lets say (a-aaaxxy). Notice this 1st sever root has only one child 'a'
+		* Then the processer will start filling terms in the 2nd server.
+			* But it also may need to find some of these term's parent node from preceding server. 
+			* For example for the term 'ab' be a child of "1st-server-root-a" node.
+			* So this node should keep an entry pointing to remote node "2nd-server-root-ab".
+			* So that during trie traversing it can traverse to its remote-child node in 2nd server.
+			* In 2nd sever's root will have a child node mapped by "ab". 
+			* Similarly term "b" (2nd-server-root-b) should also be a remote child of (1st-server-root).
+			* Note that "abb" will find parent node in 2nd sever i.e. in local.
+		* Once 2nd sever is filled at the end lets say its range is aaaxxy-bmno. 
+		* While querying a term, leveraging these ranges we can directly go to the server and look up in trie, no need to hope from sever to server.
+		* How these tries look -
 			* It will be bunch of TrieNode in momory.
-			* Each node will have 
-				* Map<Character, TrieNode> children; // to travel down the tree using char from each positions
+			* Each node will have
+				* Map<Character, TrieNode> localChildren; // to travel down the tree using char from each positions
+				* Map<Charecter, RemoteServerNodeInfo> remoteChildren; // to jump to remote child
 				* boolean isEndOfTerm // flag to mark end of a term
 				* int Rank; // rank value if end of term is true
-				* TrieNode[] topTenDescendentTerms; // top ranked descendant nodes that 
-				
-			* Root node's Map will 
-			* End of term Flag. If true the Rank of the term
-			* A Map pointing to children node mapped by next charecters
-	
+				* TermRank[] topTenTermRanks;
+				* String prifix; // current prefix may no be needed.
+			* While building the trie topTenTermRanks will be empty;
+			* Once all the tries in all multiple severs are built the processor will start counting "topTenTermRanks" for each server recursively from parent to child. In this process we may need to jump from on sever to another.
+			* During query we will not need to server to server hope because using range as index we can directly go the server where the term will exist if it is at all. 
